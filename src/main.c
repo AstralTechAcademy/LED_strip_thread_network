@@ -6,6 +6,10 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/net/openthread.h>
+#include <zephyr/net/net_l2.h>
+#include <zephyr/drivers/gpio.h>
+#include <openthread/thread.h>
 
 #if defined(CONFIG_CLI_SAMPLE_MULTIPROTOCOL)
 #include "ble.h"
@@ -19,6 +23,7 @@
 
 LOG_MODULE_REGISTER(cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 
+
 #define WELLCOME_TEXT \
 	"\n\r"\
 	"\n\r"\
@@ -28,6 +33,11 @@ LOG_MODULE_REGISTER(cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 	"For the full commands list refer to the OpenThread CLI " \
 	"documentation at:\n\r" \
 	"https://github.com/openthread/openthread/blob/master/src/cli/README.md\n\r"
+
+/* The devicetree node identifier for the "led0" alias. */
+#define LED0_NODE DT_ALIAS(led0)
+
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 int main(void)
 {
@@ -71,5 +81,16 @@ int main(void)
 	low_power_enable();
 #endif
 
+	openthread_init();
+
+	int net_res = openthread_run();
+
+	if (!gpio_is_ready_dt(&led)) {
+		return 0;
+	}
+
+	if(net_res == 0)
+		gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+	
 	return 0;
 }

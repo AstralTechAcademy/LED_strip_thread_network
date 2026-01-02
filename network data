@@ -1,0 +1,22 @@
+uart:~$ ot panid 0xdead
+Done
+uart:~$ ot networkname Gabriel
+Done
+uart:~$ ot networkkey 00112233445566778899aabbccddeeff
+
+
+Get info network 
+
+> ot router table
+> ot ipaddr
+> ot ping <IPv6 address>
+
+
+Channel: 11
+Channel Mask: 0x07fff800
+Ext PAN ID: 1111111122222222
+Mesh Local Prefix: fdde:ad00:beef:0::/64
+Network Key: 00112233445566778899aabbccddeeff
+Network Name: Gabriel
+PAN ID: 0x1235
+PSKc: fd851c2dc8adadea0d462cce28966a53
