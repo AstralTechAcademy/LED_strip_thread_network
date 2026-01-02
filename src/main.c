@@ -39,58 +39,66 @@ LOG_MODULE_REGISTER(cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
-int main(void)
+struct otInstance *ot;
+
+void openthread_network_start()
 {
-#if DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_shell_uart), zephyr_cdc_acm_uart)
-	int ret;
-	const struct device *dev;
-	uint32_t dtr = 0U;
-
-	dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_shell_uart));
-	if (dev == NULL) {
-		LOG_ERR("Failed to find specific UART device");
-		return 0;
-	}
-
-	LOG_INF("Waiting for host to be ready to communicate");
-
-	/* Data Terminal Ready - check if host is ready to communicate */
-	while (!dtr) {
-		ret = uart_line_ctrl_get(dev, UART_LINE_CTRL_DTR, &dtr);
-		if (ret) {
-			LOG_ERR("Failed to get Data Terminal Ready line state: %d",
-				ret);
-			continue;
-		}
-		k_msleep(100);
-	}
-
-	/* Data Carrier Detect Modem - mark connection as established */
-	(void)uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
-	/* Data Set Ready - the NCP SoC is ready to communicate */
-	(void)uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
-#endif
-
-	LOG_INF(WELLCOME_TEXT);
-
-#if defined(CONFIG_CLI_SAMPLE_MULTIPROTOCOL)
-	ble_enable();
-#endif
-
-#if defined(CONFIG_CLI_SAMPLE_LOW_POWER)
-	low_power_enable();
-#endif
-
 	openthread_init();
 
 	int net_res = openthread_run();
+
+	ot = openthread_get_default_instance();
+
+	if(net_res != OT_ERROR_NONE)
+		LOG_ERR("Openthread starting error [%d]", net_res);
+		return;
+	
+	LOG_INF("Openthread network %s started ", otThreadGetNetworkName(ot));
+	return;
+}
+
+extern void blink_led(void *p0, void *p1, void *p2)
+{
+	int toggle = 1;
+	gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+
+
+	while(1)
+	{
+		int role = otThreadGetDeviceRole(ot);
+		LOG_INF("Device role %s", otThreadDeviceRoleToString(role));
+
+		if(role == OT_DEVICE_ROLE_ROUTER)
+		{
+			toggle = 1;
+		}
+		else if(role == OT_DEVICE_ROLE_CHILD)
+		{
+			toggle = !toggle;
+		}
+		else
+		{
+			toggle = 0;
+		}
+
+		gpio_pin_set_dt(&led, toggle);
+		k_sleep(K_MSEC(1000));
+	}
+}
+
+K_THREAD_DEFINE(blink_led_tid, 1024, blink_led, NULL, NULL, NULL, K_LOWEST_APPLICATION_THREAD_PRIO, 0,0);
+
+int main(void)
+{
+	LOG_INF(WELLCOME_TEXT);
+
+	openthread_network_start();
 
 	if (!gpio_is_ready_dt(&led)) {
 		return 0;
 	}
 
-	if(net_res == 0)
-		gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+	k_thread_start(blink_led);
 	
 	return 0;
 }
