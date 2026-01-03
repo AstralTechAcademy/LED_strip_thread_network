@@ -10,16 +10,8 @@
 #include <zephyr/net/net_l2.h>
 #include <zephyr/drivers/gpio.h>
 #include <openthread/thread.h>
-
-#if defined(CONFIG_CLI_SAMPLE_MULTIPROTOCOL)
-#include "ble.h"
-#endif
-
-#if defined(CONFIG_CLI_SAMPLE_LOW_POWER)
-#include "low_power.h"
-#endif
-
 #include <zephyr/drivers/uart.h>
+#include <openthread/udp.h>
 
 LOG_MODULE_REGISTER(cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 
@@ -36,8 +28,10 @@ LOG_MODULE_REGISTER(cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
+#define LED1_NODE DT_ALIAS(led1)
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+static const struct gpio_dt_spec led1 = GPIO_DT_SPEC_GET(LED1_NODE, gpios);
 
 struct otInstance *ot;
 
@@ -57,31 +51,44 @@ void openthread_network_start()
 	return;
 }
 
+static otUdpSocket socket;
+
+/* Callback cuando llega un paquete UDP */
+static void udp_receive_cb(void *context,
+                           otMessage *message,
+                           const otMessageInfo *message_info)
+{
+	LOG_INF("HELLO UDP");
+	return;
+}
+
 extern void blink_led(void *p0, void *p1, void *p2)
 {
-	int toggle = 1;
-	gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
-
-
+	gpio_pin_configure_dt(&led, GPIO_OUTPUT_INACTIVE);
+	gpio_pin_configure_dt(&led1, GPIO_OUTPUT_INACTIVE);
+	
 	while(1)
 	{
 		int role = otThreadGetDeviceRole(ot);
-		LOG_INF("Device role %s", otThreadDeviceRoleToString(role));
 
 		if(role == OT_DEVICE_ROLE_ROUTER)
 		{
-			toggle = 1;
+			gpio_pin_set_dt(&led, 1);
 		}
 		else if(role == OT_DEVICE_ROLE_CHILD)
 		{
-			toggle = !toggle;
+			gpio_pin_toggle_dt(&led);
 		}
 		else
 		{
-			toggle = 0;
+			gpio_pin_set_dt(&led, 0);
 		}
 
-		gpio_pin_set_dt(&led, toggle);
+		if(role == OT_DEVICE_ROLE_LEADER)
+		{
+			gpio_pin_toggle_dt(&led1);
+		}
+
 		k_sleep(K_MSEC(1000));
 	}
 }
@@ -94,11 +101,28 @@ int main(void)
 
 	openthread_network_start();
 
-	if (!gpio_is_ready_dt(&led)) {
+	if (!gpio_is_ready_dt(&led) || !gpio_is_ready_dt(&led1)) {
 		return 0;
 	}
-
+	
 	k_thread_start(blink_led);
+
+	otError error;
+    otSockAddr addr = {0};
+
+    addr.mPort = 9090;
+
+    error = otUdpOpen(ot, &socket, udp_receive_cb, ot);
+    if (error != OT_ERROR_NONE) {
+        LOG_ERR("otUdpOpen error: %d", error);
+        return;
+    }
+
+    error = otUdpBind(ot, &socket, &addr, OT_NETIF_THREAD);
+    if (error != OT_ERROR_NONE) {
+        LOG_ERR("otUdpBind error: %d", error);
+        return;
+    }
 	
 	return 0;
 }

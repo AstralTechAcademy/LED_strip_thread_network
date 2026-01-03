@@ -11,6 +11,12 @@ Get info network
 > ot ipaddr
 > ot ping <IPv6 address>
 
+# UDP Client CLI
+
+> ot udp open
+> ot upd connect <IP6> <PORT>
+> ot upd send helloworld
+
 
 Channel: 11
 Channel Mask: 0x07fff800
