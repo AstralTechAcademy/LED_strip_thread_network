@@ -17,6 +17,7 @@ Get info network
 > ot upd connect <IP6> <PORT>
 > ot upd send helloworld
 
+Multicast address ff03::2
 
 Channel: 11
 Channel Mask: 0x07fff800

@@ -5,16 +5,16 @@
  */
 
 #include <zephyr/kernel.h>
-#include <zephyr/logging/log.h>
 #include <zephyr/net/openthread.h>
 #include <zephyr/net/net_l2.h>
 #include <zephyr/drivers/gpio.h>
 #include <openthread/thread.h>
 #include <zephyr/drivers/uart.h>
-#include <openthread/udp.h>
+#include "g_udp.h"
 
-LOG_MODULE_REGISTER(cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
+#define G_SERVER 1
 
+LOG_MODULE_REGISTER(main, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 
 #define WELLCOME_TEXT \
 	"\n\r"\
@@ -33,8 +33,6 @@ LOG_MODULE_REGISTER(cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const struct gpio_dt_spec led1 = GPIO_DT_SPEC_GET(LED1_NODE, gpios);
 
-struct otInstance *ot;
-
 void openthread_network_start()
 {
 	openthread_init();
@@ -48,17 +46,6 @@ void openthread_network_start()
 		return;
 	
 	LOG_INF("Openthread network %s started ", otThreadGetNetworkName(ot));
-	return;
-}
-
-static otUdpSocket socket;
-
-/* Callback cuando llega un paquete UDP */
-static void udp_receive_cb(void *context,
-                           otMessage *message,
-                           const otMessageInfo *message_info)
-{
-	LOG_INF("HELLO UDP");
 	return;
 }
 
@@ -107,22 +94,13 @@ int main(void)
 	
 	k_thread_start(blink_led);
 
-	otError error;
-    otSockAddr addr = {0};
-
-    addr.mPort = 9090;
-
-    error = otUdpOpen(ot, &socket, udp_receive_cb, ot);
-    if (error != OT_ERROR_NONE) {
-        LOG_ERR("otUdpOpen error: %d", error);
+#if G_SERVER
+	otError error = g_udp_start_server();
+	if (error != OT_ERROR_NONE) {
+        LOG_ERR("g_udp_start_server error: %d", error);
         return;
     }
+#endif
 
-    error = otUdpBind(ot, &socket, &addr, OT_NETIF_THREAD);
-    if (error != OT_ERROR_NONE) {
-        LOG_ERR("otUdpBind error: %d", error);
-        return;
-    }
-	
 	return 0;
 }
