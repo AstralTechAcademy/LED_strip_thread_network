@@ -8,7 +8,7 @@
 static struct otInstance *ot;
 static otUdpSocket socket;
 
-static void g_msg_handler(void *context,
+static void g_node_handler(void *context,
                            otMessage *message,
                            const otMessageInfo *message_info);
 otError g_udp_start_server();

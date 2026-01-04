@@ -10,7 +10,7 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(LED_strip_thread_network)
 
 # NORDIC SDK APP START
-target_sources(app PRIVATE src/main.c src/g_udp.c src/g_udp.h)
+target_sources(app PRIVATE src/main.c src/g_udp.c src/g_udp.h src/g_node.h)
 # NORDIC SDK APP END
 
 target_sources_ifdef(CONFIG_CLI_SAMPLE_MULTIPROTOCOL app PRIVATE src/ble.c)
