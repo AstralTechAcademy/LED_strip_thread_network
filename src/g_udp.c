@@ -56,10 +56,20 @@ void g_control_handler(void *context,
                            otMessage *message,
                            const otMessageInfo *message_info)
 {
-    otIp6Address addr = message_info->mPeerAddr;
-    printAddress(&message_info->mPeerAddr);
-    g_node_t node = {1, addr};
-    nodes = addNode(nodes, node);
+    uint16_t length = otMessageGetLength(message);
+    char buffer[length];
+    memset(buffer, 0, sizeof(buffer));
+    otMessageRead(message, 0, &buffer, length);
+    
+    if(buffer[0] == 0)
+    {   
+        uint8_t nodeId = atoi(buffer[1]);
+        otIp6Address addr = message_info->mPeerAddr;
+        g_node_t node = {1, addr};
+        nodes = addNode(nodes, node);
+    }
+
+
     return;
 }
 
@@ -74,6 +84,22 @@ void g_node_handler(void *context,
     nodes = addNode(nodes, node);
 
     printAddress(&nodes->value.address);
+    uint16_t length = otMessageGetLength(message);
+    char buffer[length+1];
+    memset(buffer, 0, sizeof(buffer));
+    otMessageRead(message, 0, &buffer, length);
+    buffer[length+1] = '\0'; 
+
+    LOG_INF("Message type: %c", buffer[0]);
+
+    if(buffer[0] == '0')
+    {   
+        int nodeId = atoi(&buffer[1]);
+        otIp6Address addr = message_info->mPeerAddr;
+        g_node_t node = {nodeId, addr};
+        nodes = addNode(nodes, node);
+        LOG_INF("NodeID: %d", nodeId);
+    }
 
 	return;
 }
