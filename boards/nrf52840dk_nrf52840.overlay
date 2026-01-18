@@ -4,6 +4,7 @@
 	aliases {
 		led0 = &led0;
 		led1 = &led1;
+		disp1 = &disp1;
 	};
 
 	leds {
@@ -12,20 +13,16 @@
 			gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
 			label = "LED0";
 		};
+	};
 
-		led1: led_1 {
-			gpios = <&gpio0 14 GPIO_ACTIVE_LOW>;
-			label = "LED1";
-		};
+	disp1: disp_1 {
+		gpios = <&gpio0 27 GPIO_ACTIVE_HIGH>;
+		status = "okay";
 	};
 };
 
-&gpiote130 {
-	status = "okay";
-};
-
-&gpio9 {
-	status = "okay";
+&gpio0 {
+    status = "okay";
 };
 
 &uart0 {

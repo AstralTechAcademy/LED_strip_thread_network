@@ -1,0 +1,35 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/ {
+	aliases {
+		led0 = &led0;
+		led1 = &led1;
+		disp1 = &disp1;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: led_0 {
+			gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
+			label = "LED0";
+		};
+	};
+
+	disp1: disp_1 {
+			gpios = <&gpio0 27 GPIO_ACTIVE_HIGH>;
+			status = "okay";
+	};
+};
+
+&gpiote130 {
+	status = "okay";
+};
+
+&gpio0 {
+    status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+	hw-flow-control;
+};
