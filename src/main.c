@@ -33,15 +33,14 @@ LOG_MODULE_REGISTER(main, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 #define LED1_NODE DT_ALIAS(led1)
 
 // LED 1
-#define GPIO011_PIN NRF_GPIO_PIN_MAP(0, 11) // For PCA10056
-#define GPIO024_PIN NRF_GPIO_PIN_MAP(0, 24) // For PCA10056
-#define GPIO109_PIN NRF_GPIO_PIN_MAP(1, 9) // For PCA10056
-#define GPIO100_PIN NRF_GPIO_PIN_MAP(1, 0) // For PCA10056
-#define GPIO015_PIN NRF_GPIO_PIN_MAP(0, 15) // For PCA10056
-#define GPIO013_PIN NRF_GPIO_PIN_MAP(0, 13) // For PCA10056
-#define GPIO020_PIN NRF_GPIO_PIN_MAP(0, 20) // For PCA10056
-#define GPIO016_PIN NRF_GPIO_PIN_MAP(0, 16) // For PCA10056
-#define GPIO012_PIN NRF_GPIO_PIN_MAP(0, 12) // For PCA10056
+#define GPIO003_PIN NRF_GPIO_PIN_MAP(0, 3) // For PCA10056
+#define GPIO004_PIN NRF_GPIO_PIN_MAP(0, 4) // For PCA10056
+#define GPIO028_PIN NRF_GPIO_PIN_MAP(0, 28) // For PCA10056
+#define GPIO110_PIN NRF_GPIO_PIN_MAP(1, 10) // For PCA10056
+#define GPIO111_PIN NRF_GPIO_PIN_MAP(1, 11) // For PCA10056
+#define GPIO112_PIN NRF_GPIO_PIN_MAP(1, 12) // For PCA10056
+#define GPIO113_PIN NRF_GPIO_PIN_MAP(1, 13) // For PCA10056
+#define GPIO114_PIN NRF_GPIO_PIN_MAP(1, 14) // For PCA10056
 
 // LED 2 
 #define GPIO101_PIN NRF_GPIO_PIN_MAP(1, 1) // For PCA10056
@@ -53,10 +52,19 @@ LOG_MODULE_REGISTER(main, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 #define GPIO108_PIN NRF_GPIO_PIN_MAP(1, 8) // For PCA10056
 #define GPIO109_PIN NRF_GPIO_PIN_MAP(1, 9) // For PCA10056
 
-
+#define MAX_GPIOS 8
 
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const struct gpio_dt_spec led1 = GPIO_DT_SPEC_GET(LED1_NODE, gpios);
+struct Number_Node
+{
+    int gpio;
+    struct Number_Node *next;
+};
+
+typedef struct {
+	uint8_t gpios[MAX_GPIOS];
+} sled_t ; 
 
 void openthread_network_start()
 {
@@ -123,6 +131,19 @@ int main(void)
 {
 	LOG_INF(WELLCOME_TEXT);
 
+	LOG_INF("%d", GPIO028_PIN);
+	LOG_INF("%d", GPIO101_PIN);
+	LOG_INF("%d", GPIO110_PIN);
+	LOG_INF("%d", GPIO111_PIN);
+
+	sled_t sLed1 = {
+		.gpios = {GPIO003_PIN, GPIO004_PIN, GPIO028_PIN, GPIO110_PIN, GPIO111_PIN, GPIO112_PIN, GPIO113_PIN, GPIO114_PIN}
+	};
+
+	sled_t sLed2 = {
+		.gpios = {GPIO101_PIN, GPIO102_PIN, GPIO103_PIN, GPIO104_PIN, GPIO105_PIN, GPIO107_PIN, GPIO108_PIN, GPIO109_PIN}
+	};
+
 	openthread_network_start();
 
 	if (!gpio_is_ready_dt(&led) || !gpio_is_ready_dt(&led1) ) {
@@ -134,45 +155,19 @@ int main(void)
 //	k_thread_start(controlTime);
 
 	// LED 1
-	nrf_gpio_cfg_output(GPIO016_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO012_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO011_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO024_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO015_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO013_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO100_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO109_PIN); // Configure P0.13 as output
-	
-	// LED 2
-	nrf_gpio_cfg_output(GPIO101_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO102_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO103_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO104_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO105_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO108_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO107_PIN); // Configure P0.13 as output
-	nrf_gpio_cfg_output(GPIO107_PIN); // Configure P0.13 as output
+	for (uint8_t index = 0; index < MAX_GPIOS; index++)
+	{
+		nrf_gpio_cfg_output(sLed1.gpios[index]);
+		nrf_gpio_cfg_output(sLed2.gpios[index]);
+	}
 
 	while (1) {
-		// LED 1
-        nrf_gpio_pin_set(GPIO016_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO012_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO011_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO024_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO015_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO013_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO100_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO109_PIN);  // Turn LED on
 
-		// LED 2
-		nrf_gpio_pin_set(GPIO101_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO102_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO103_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO104_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO105_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO107_PIN);  // Turn LED onb
-		nrf_gpio_pin_set(GPIO108_PIN);  // Turn LED on
-		nrf_gpio_pin_set(GPIO109_PIN);  // Turn LED on                                                                                                                                             
+		for (uint8_t index = 0; index < MAX_GPIOS; index++)
+		{
+			nrf_gpio_pin_set(sLed1.gpios[index]);
+			nrf_gpio_pin_set(sLed2.gpios[index]);
+		}                                                                                                                                           
     }
                                       
 
