@@ -31,6 +31,8 @@ LOG_MODULE_REGISTER(main, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 #define LED1_NODE DT_ALIAS(led1)
+
+// LED 1
 #define GPIO011_PIN NRF_GPIO_PIN_MAP(0, 11) // For PCA10056
 #define GPIO024_PIN NRF_GPIO_PIN_MAP(0, 24) // For PCA10056
 #define GPIO109_PIN NRF_GPIO_PIN_MAP(1, 9) // For PCA10056
@@ -40,6 +42,16 @@ LOG_MODULE_REGISTER(main, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL);
 #define GPIO020_PIN NRF_GPIO_PIN_MAP(0, 20) // For PCA10056
 #define GPIO016_PIN NRF_GPIO_PIN_MAP(0, 16) // For PCA10056
 #define GPIO012_PIN NRF_GPIO_PIN_MAP(0, 12) // For PCA10056
+
+// LED 2 
+#define GPIO101_PIN NRF_GPIO_PIN_MAP(1, 1) // For PCA10056
+#define GPIO102_PIN NRF_GPIO_PIN_MAP(1, 2) // For PCA10056
+#define GPIO103_PIN NRF_GPIO_PIN_MAP(1, 3) // For PCA10056
+#define GPIO104_PIN NRF_GPIO_PIN_MAP(1, 4) // For PCA10056
+#define GPIO105_PIN NRF_GPIO_PIN_MAP(1, 5)// For PCA10056
+#define GPIO107_PIN NRF_GPIO_PIN_MAP(1, 7) // For PCA10056
+#define GPIO108_PIN NRF_GPIO_PIN_MAP(1, 8) // For PCA10056
+#define GPIO109_PIN NRF_GPIO_PIN_MAP(1, 9) // For PCA10056
 
 
 
@@ -121,6 +133,7 @@ int main(void)
 	k_thread_start(blink_led);
 //	k_thread_start(controlTime);
 
+	// LED 1
 	nrf_gpio_cfg_output(GPIO016_PIN); // Configure P0.13 as output
 	nrf_gpio_cfg_output(GPIO012_PIN); // Configure P0.13 as output
 	nrf_gpio_cfg_output(GPIO011_PIN); // Configure P0.13 as output
@@ -129,7 +142,19 @@ int main(void)
 	nrf_gpio_cfg_output(GPIO013_PIN); // Configure P0.13 as output
 	nrf_gpio_cfg_output(GPIO100_PIN); // Configure P0.13 as output
 	nrf_gpio_cfg_output(GPIO109_PIN); // Configure P0.13 as output
+	
+	// LED 2
+	nrf_gpio_cfg_output(GPIO101_PIN); // Configure P0.13 as output
+	nrf_gpio_cfg_output(GPIO102_PIN); // Configure P0.13 as output
+	nrf_gpio_cfg_output(GPIO103_PIN); // Configure P0.13 as output
+	nrf_gpio_cfg_output(GPIO104_PIN); // Configure P0.13 as output
+	nrf_gpio_cfg_output(GPIO105_PIN); // Configure P0.13 as output
+	nrf_gpio_cfg_output(GPIO108_PIN); // Configure P0.13 as output
+	nrf_gpio_cfg_output(GPIO107_PIN); // Configure P0.13 as output
+	nrf_gpio_cfg_output(GPIO107_PIN); // Configure P0.13 as output
+
 	while (1) {
+		// LED 1
         nrf_gpio_pin_set(GPIO016_PIN);  // Turn LED on
 		nrf_gpio_pin_set(GPIO012_PIN);  // Turn LED on
 		nrf_gpio_pin_set(GPIO011_PIN);  // Turn LED on
@@ -138,8 +163,18 @@ int main(void)
 		nrf_gpio_pin_set(GPIO013_PIN);  // Turn LED on
 		nrf_gpio_pin_set(GPIO100_PIN);  // Turn LED on
 		nrf_gpio_pin_set(GPIO109_PIN);  // Turn LED on
-    }
 
+		// LED 2
+		nrf_gpio_pin_set(GPIO101_PIN);  // Turn LED on
+		nrf_gpio_pin_set(GPIO102_PIN);  // Turn LED on
+		nrf_gpio_pin_set(GPIO103_PIN);  // Turn LED on
+		nrf_gpio_pin_set(GPIO104_PIN);  // Turn LED on
+		nrf_gpio_pin_set(GPIO105_PIN);  // Turn LED on
+		nrf_gpio_pin_set(GPIO107_PIN);  // Turn LED onb
+		nrf_gpio_pin_set(GPIO108_PIN);  // Turn LED on
+		nrf_gpio_pin_set(GPIO109_PIN);  // Turn LED on                                                                                                                                             
+    }
+                                      
 
 #if G_SERVER
 	otError error = g_udp_start_server();
